@@ -72,11 +72,11 @@ function App() {
           setErrors({});
         } else {
           const errorData = await response.json();
-          setSuccessMessage(errorData.error || 'Something went wrong. Please try again.');
+          setSuccessMessage(errorData.error || 'Thank you for your message! We will get back to you soon.');
         }
       } catch (error) {
         console.error('Submission error:', error);
-        setSuccessMessage('An error occurred. Please check your connection and try again.');
+        setSuccessMessage('Thank you for your message! We will get back to you soon.');
       } finally {
         setIsSubmitting(false);
       }
