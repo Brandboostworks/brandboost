@@ -15,7 +15,9 @@ interface FormData {
 
 function App() {
   const [formData, setFormData] = useState<FormData>({ name: '', number: '', message: '' });
-  const [errors, setErrors] = useState<Partial<FormData>>({}); // Partial allows only some fields to have errors
+  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -46,10 +48,34 @@ function App() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSuccessMessage(null);
+
     if (validate()) {
-      e.currentTarget.submit();
+      setIsSubmitting(true);
+
+      try {
+        const response = await fetch('https://formsquash.io/f/VGcR020mxyfdSQvPKWlB', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          setSuccessMessage('Thank you for your message! We will get back to you soon.');
+          setFormData({ name: '', number: '', message: '' }); // Reset form
+          setErrors({});
+        } else {
+          setSuccessMessage('Something went wrong. Please try again.');
+        }
+      } catch (error) {
+        setSuccessMessage('An error occurred. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -67,12 +93,7 @@ function App() {
           <div className="flex flex-col lg:flex-row gap-16">
             <div className="flex-1">
               <div className="max-w-md mx-auto">
-                <form
-                  action="https://formsquash.io/f/VGcR020mxyfdSQvPKWlB"
-                  method="POST"
-                  onSubmit={handleSubmit}
-                  className="space-y-6"
-                >
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <input
                       type="text"
@@ -112,10 +133,19 @@ function App() {
                     ></textarea>
                     {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
                   </div>
-                  <button className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300">
-                    Send Message
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`w-full bg-white text-black py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300 ${
+                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                   </button>
                 </form>
+                {successMessage && (
+                  <p className="text-center text-lg mt-4 text-green-500">{successMessage}</p>
+                )}
               </div>
             </div>
 
