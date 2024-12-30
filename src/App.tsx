@@ -23,18 +23,20 @@ function App() {
             {/* Contact Form */}
             <div className="flex-1">
               <div className="max-w-md mx-auto">
-                <form className="space-y-6">
+                <form action="https://formsquash.io/f/VGcR020mxyfdSQvPKWlB" method="POST" className="space-y-6">
                   <div>
                     <input
                       type="text"
+                      name="name"
                       placeholder="Name"
                       className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300"
                     />
                   </div>
                   <div>
                     <input
-                      type="email"
-                      placeholder="Email"
+                      type="tel"
+                      name="number"
+                      placeholder="Mobile Number"
                       className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300"
                     />
                   </div>
@@ -42,8 +44,10 @@ function App() {
                     <textarea
                       placeholder="Message"
                       rows={4}
+                      name="message"
                       className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300"
                     ></textarea>
+                    <input type="hidden" name="_gotcha"></input>
                   </div>
                   <button className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300">
                     Send Message
