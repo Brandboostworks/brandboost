@@ -51,10 +51,10 @@ function App() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSuccessMessage(null);
-
+  
     if (validate()) {
       setIsSubmitting(true);
-
+  
       try {
         const response = await fetch('https://formsquash.io/f/VGcR020mxyfdSQvPKWlB', {
           method: 'POST',
@@ -63,22 +63,26 @@ function App() {
           },
           body: JSON.stringify(formData),
         });
-
+  
         if (response.ok) {
-          setSuccessMessage('Thank you for your message! We will get back to you soon.');
+          // Check for any additional success messages in the response body, if applicable
+          const result = await response.json();
+          setSuccessMessage(result.message || 'Thank you for your message! We will get back to you soon.');
           setFormData({ name: '', number: '', message: '' }); // Reset form
           setErrors({});
         } else {
-          setSuccessMessage('Something went wrong. Please try again.');
+          const errorData = await response.json();
+          setSuccessMessage(errorData.error || 'Something went wrong. Please try again.');
         }
       } catch (error) {
-        setSuccessMessage('An error occurred. Please try again.');
+        console.error('Submission error:', error);
+        setSuccessMessage('An error occurred. Please check your connection and try again.');
       } finally {
         setIsSubmitting(false);
       }
     }
   };
-
+  
   return (
     <div className="min-h-screen bg-black text-white">
       <Navbar />
