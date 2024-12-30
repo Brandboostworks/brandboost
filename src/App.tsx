@@ -6,46 +6,50 @@ import ServicesSection from './components/services/ServicesSection';
 import AboutSection from './components/about/AboutSection';
 import { FaInstagram } from 'react-icons/fa';
 
-function App() {
-  const [formStatus, setFormStatus] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    number: '',
-    message: ''
-  });
+// Define the type for the form data
+interface FormData {
+  name: string;
+  number: string;
+  message: string;
+}
 
-  const handleInputChange = (e) => {
+function App() {
+  const [formData, setFormData] = useState<FormData>({ name: '', number: '', message: '' });
+  const [errors, setErrors] = useState<Partial<FormData>>({}); // Partial allows only some fields to have errors
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const validate = () => {
+    const newErrors: Partial<FormData> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    if (!formData.number.trim()) {
+      newErrors.number = 'Mobile Number is required';
+    } else if (!/^[0-9]{10}$/.test(formData.number)) {
+      newErrors.number = 'Mobile Number must be a valid 10-digit number';
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setFormStatus('sending');
-
-    try {
-      const response = await fetch('https://formsquash.io/f/VGcR020mxyfdSQvPKWlB', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        setFormStatus('success');
-        setFormData({ name: '', number: '', message: '' }); // Reset form
-        setTimeout(() => setFormStatus(''), 3000); // Clear status after 3 seconds
-      } else {
-        setFormStatus('error');
-        setTimeout(() => setFormStatus(''), 3000);
-      }
-    } catch (error) {
-      setFormStatus('error');
-      setTimeout(() => setFormStatus(''), 3000);
+    if (validate()) {
+      e.currentTarget.submit();
     }
   };
 
@@ -57,71 +61,64 @@ function App() {
       <ServicesSection />
       <AboutSection />
 
-      {/* Contact Section */}
       <section id="contact" className="py-20 bg-black">
         <div className="container mx-auto px-4">
           <h2 className="text-4xl font-bold text-center mb-16 text-white">Get In Touch</h2>
           <div className="flex flex-col lg:flex-row gap-16">
-            {/* Contact Form */}
             <div className="flex-1">
               <div className="max-w-md mx-auto">
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form
+                  action="https://formsquash.io/f/VGcR020mxyfdSQvPKWlB"
+                  method="POST"
+                  onSubmit={handleSubmit}
+                  className="space-y-6"
+                >
                   <div>
                     <input
                       type="text"
                       name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
                       placeholder="Name"
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300"
-                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 bg-gray-800 border ${
+                        errors.name ? 'border-red-500' : 'border-gray-700'
+                      } rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300`}
                     />
+                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                   </div>
                   <div>
                     <input
                       type="tel"
                       name="number"
-                      value={formData.number}
-                      onChange={handleInputChange}
                       placeholder="Mobile Number"
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300"
-                      required
+                      value={formData.number}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 bg-gray-800 border ${
+                        errors.number ? 'border-red-500' : 'border-gray-700'
+                      } rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300`}
                     />
+                    {errors.number && <p className="text-red-500 text-sm mt-1">{errors.number}</p>}
                   </div>
                   <div>
                     <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
                       placeholder="Message"
                       rows={4}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300"
-                      required
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 bg-gray-800 border ${
+                        errors.message ? 'border-red-500' : 'border-gray-700'
+                      } rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white transition-colors duration-300`}
                     ></textarea>
-                    <input type="hidden" name="_gotcha"></input>
+                    {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
                   </div>
-                  <button 
-                    type="submit"
-                    disabled={formStatus === 'sending'}
-                    className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {formStatus === 'sending' ? 'Sending...' : 'Send Message'}
+                  <button className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300">
+                    Send Message
                   </button>
-                  {formStatus === 'success' && (
-                    <div className="text-green-500 text-center mt-2">
-                      Message sent successfully!
-                    </div>
-                  )}
-                  {formStatus === 'error' && (
-                    <div className="text-red-500 text-center mt-2">
-                      Something went wrong. Please try again.
-                    </div>
-                  )}
                 </form>
               </div>
             </div>
 
-            {/* Business Details */}
             <div className="flex-1 text-center lg:text-left text-white space-y-6">
               <h3 className="text-2xl font-bold">More about Us</h3>
               <p className="text-lg">
