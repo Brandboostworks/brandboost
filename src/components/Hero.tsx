@@ -36,7 +36,7 @@ const Hero = () => {
           onClick={scrollToContact}
           className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition-all duration-300 flex items-center gap-2 mx-auto"
         >
-          Get Started <ArrowRight size={20} />
+          Connect with Us <ArrowRight size={20} />
         </motion.button>
         <motion.div
           animate={{ y: [0, 10, 0] }}
